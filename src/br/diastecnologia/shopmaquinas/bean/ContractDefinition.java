@@ -26,7 +26,7 @@ public class ContractDefinition implements Serializable{
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(updatable=false)
-	private int ContractDefinitionID;
+	private int contractDefinitionID;
 	
 	private String name;
 	
@@ -42,10 +42,10 @@ public class ContractDefinition implements Serializable{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 	public int getContractDefinitionID() {
-		return ContractDefinitionID;
+		return contractDefinitionID;
 	}
 	public void setContractDefinitionID(int contractDefinitionID) {
-		ContractDefinitionID = contractDefinitionID;
+		this.contractDefinitionID = contractDefinitionID;
 	}
 	public String getName() {
 		return name;

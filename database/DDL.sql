@@ -1,37 +1,57 @@
 drop database shopmaquinas;
 create database shopmaquinas;
 
-CREATE TABLE shopmaquinas.Company (
-	CompanyID INT NOT NULL AUTO_INCREMENT,
-	Name VARCHAR(200) NOT NULL,
-	ComercialName VARCHAR(200) NOT NULL,
-	CNPJ VARCHAR(15) NOT NULL,
-	PRIMARY KEY(CompanyID));
+CREATE TABLE shopmaquinas.Address(
+	AddressID INT NOT NULL AUTO_INCREMENT,
+	Cep VARCHAR(8) NOT NULL,
+	UF VARCHAR(2) NOT NULL,
+	City VARCHAR(300) NOT NULL,
+	Neighborhood VARCHAR(300) NOT NULL,
+	Street VARCHAR(300) NOT NULL,
+	Number VARCHAR(20) NULL,
+	Complement VARCHAR(300) NULL,
+	PRIMARY KEY(AddressID)
+);
 
-CREATE TABLE `shopmaquinas`.`Person` (
-  `PersonID` INT NOT NULL AUTO_INCREMENT,
-  `Lastname` VARCHAR(200) NULL,
-  `Firstname` VARCHAR(200) NULL,
-  `Gender` INT NOT NULL,
-  CompanyID INT NULL,
+CREATE TABLE shopmaquinas.Person (
+  PersonID INT NOT NULL AUTO_INCREMENT,
+  PersonType VARCHAR(200) NOT NULL,
+  Lastname VARCHAR(200) NULL,
+  Firstname VARCHAR(200) NULL,
+  Gender INT NOT NULL,
+  AddressID INT NULL,
   Email VARCHAR(200) NOT NULL,
   Phone VARCHAR(200) NOT NULL,
-  PRIMARY KEY (`PersonID`),
-  CONSTRAINT `PersonFKCompany`
-    FOREIGN KEY (`CompanyID`)
-    REFERENCES `shopmaquinas`.`Company` (`CompanyID`)
+  PRIMARY KEY (PersonID),
+  CONSTRAINT PersonFKAddress
+    FOREIGN KEY (AddressID)
+    REFERENCES shopmaquinas.Address (AddressID)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 );
 
-CREATE TABLE `shopmaquinas`.`Document` (
-  `PersonID` INT NOT NULL,
-  `DocumentType` VARCHAR(45) NOT NULL,
-  `DocumentNumber` VARCHAR(45) NULL,
-  PRIMARY KEY (`PersonID`, `DocumentType`),
-  CONSTRAINT `DocumentFKPerson`
-    FOREIGN KEY (`PersonID`)
-    REFERENCES `shopmaquinas`.`person` (`PersonID`)
+CREATE TABLE shopmaquinas.Image (
+	ImageID INT NOT NULL AUTO_INCREMENT,
+	Path VARCHAR(200) NOT NULL,
+	PersonID INT NOT NULL,
+	PRIMARY KEY(ImageID),
+	CONSTRAINT ImageFKPerson
+    FOREIGN KEY (PersonID)
+    REFERENCES shopmaquinas.Person (PersonID)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+	
+
+
+CREATE TABLE shopmaquinas.Document (
+  PersonID INT NOT NULL,
+  DocumentType VARCHAR(45) NOT NULL,
+  DocumentNumber VARCHAR(45) NULL,
+  PRIMARY KEY (PersonID, DocumentType),
+  CONSTRAINT DocumentFKPerson
+    FOREIGN KEY (PersonID)
+    REFERENCES shopmaquinas.Person (PersonID)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
     
@@ -43,7 +63,7 @@ CREATE TABLE shopmaquinas.User(
 	PRIMARY KEY (UserID),
 	CONSTRAINT UserFKPerson
 	    FOREIGN KEY (PersonID)
-	    REFERENCES shopmaquinas.person (PersonID)
+	    REFERENCES shopmaquinas.Person (PersonID)
 	    ON DELETE NO ACTION
 	    ON UPDATE NO ACTION
 );
@@ -75,6 +95,21 @@ CREATE TABLE shopmaquinas.Contract(
 		ON DELETE NO ACTION
 	    ON UPDATE NO ACTION
 );
+
+CREATE TABLE shopmaquinas.Billing(
+	BillingID INT NOT NULL AUTO_INCREMENT,
+	ContractID INT NOT NULL,
+	DueDate DATETIME NOT NULL,
+	Amount DECIMAL(9,2) NOT NULL,
+	Status VARCHAR(20) NOT NULL,
+	PRIMARY KEY(BillingID),
+	CONSTRAINT BillingFKContract
+		FOREIGN KEY (ContractID)
+		REFERENCES shopmaquinas.Contract (ContractID)
+		ON DELETE NO ACTION
+	    ON UPDATE NO ACTION
+);
+
 
 CREATE TABLE shopmaquinas.ContractDefinitionProperty(
 	ContractDefinitionPropertyID INT NOT NULL AUTO_INCREMENT,
@@ -123,14 +158,15 @@ CREATE TABLE shopmaquinas.AdProperty(
 	AdPropertyID INT NOT NULL AUTO_INCREMENT,
 	Name VARCHAR(200) NOT NULL,
 	Description VARCHAR(2000),
+	Visible BIT NOT NULL,
 	PRIMARY KEY (AdPropertyID)
 );
 
 CREATE TABLE shopmaquinas.AdPropertyValue(
 	AdID INT NOT NULL,
 	AdPropertyID INT NOT NULL,
-	Value VARCHAR(2000),
-	PRIMARY KEY(AdID,AdPropertyID),
+	Value VARCHAR(767) NOT NULL,
+	PRIMARY KEY(AdID,AdPropertyID, Value),
 	CONSTRAINT AdPropertyValueFKAd
 		FOREIGN KEY (AdID)
 		REFERENCES shopmaquinas.Ad (AdID)
@@ -163,10 +199,49 @@ CREATE TABLE shopmaquinas.Message(
 	    ON UPDATE NO ACTION
 );
 
+DROP TABLE IF EXISTS shopmaquinas.Category;
+CREATE TABLE shopmaquinas.Category(
+	Id INT NOT NULL AUTO_INCREMENT,
+	Name VARCHAR(200) NOT NULL,
+	PRIMARY KEY(ID)
+);
+
+DROP TABLE IF EXISTS shopmaquinas.Type;
+CREATE TABLE shopmaquinas.Type(
+	Id INT NOT NULL AUTO_INCREMENT,
+	Name VARCHAR(200) NOT NULL,
+	ParentId INT NOT NULL,
+	PRIMARY KEY(ID)
+);
+
+DROP TABLE IF EXISTS shopmaquinas.Subtype;
+CREATE TABLE shopmaquinas.Subtype(
+	Id INT NOT NULL AUTO_INCREMENT,
+	Name VARCHAR(200) NOT NULL,
+	ParentId INT NOT NULL,
+	PRIMARY KEY(ID)
+);
+
+DROP TABLE IF EXISTS shopmaquinas.Brand;
+CREATE TABLE shopmaquinas.Brand(
+	Id INT NOT NULL AUTO_INCREMENT,
+	Name VARCHAR(200) NOT NULL,
+	ParentId INT NOT NULL,
+	PRIMARY KEY(ID)
+);
+
+DROP TABLE IF EXISTS shopmaquinas.Model;
+CREATE TABLE shopmaquinas.Model(
+	Id INT NOT NULL AUTO_INCREMENT,
+	Name VARCHAR(200) NOT NULL,
+	ParentId INT NOT NULL,
+	PRIMARY KEY(ID)
+);
+
 
 -- PROPRIEDADES DOS PLANOS
 INSERT INTO shopmaquinas.ContractDefinitionProperty (Name, Description) VALUES ('TYPE', 'Tipo do plano');
-INSERT INTO shopmaquinas.ContractDefinitionProperty (Name, Description) VALUES ('PRICE', 'Preço do plano');
+INSERT INTO shopmaquinas.ContractDefinitionProperty (Name, Description) VALUES ('PRICE', 'Preço do plano (R$)');
 INSERT INTO shopmaquinas.ContractDefinitionProperty (Name, Description) VALUES ('AD_QUANTITY', 'Quantidade de anúncios');
 
 -- PLANOS
@@ -176,48 +251,27 @@ INSERT INTO shopmaquinas.ContractDefinition (Name, Description, StartDate) VALUE
 -- VALOR DAS PROPRIEDADES DOS PLANOS
 INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (1, 1, 'Empresarial');
 INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (2, 1, '50.00');
-INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (3, 1, '1');
+INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (3, 1, '5');
 INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (1, 2, 'Particular');
 INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (2, 2, '30.00');
-INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (3, 2, '1');
-
--- EMPRESAS
-INSERT INTO shopmaquinas.Company(Name, ComercialName, CNPJ) VALUES ('ShopMaquinas', 'Shop Maquinas Agrícolas', '123.1111/123');
-
--- PESSOAS
-INSERT INTO shopmaquinas.Person(Firstname, Lastname, Gender, Email, Phone, CompanyID) VALUES ('Administrador', 'ShopMaquinas', 0, 'admin@shopmaquinas.com.br', '11982131379', 1);
-INSERT INTO shopmaquinas.Person(Firstname, Lastname, Gender, Email, Phone) VALUES ('Marcelo', 'Dias', 0, 'maruero@gmail.com', '11982131379');
-
--- DOCUMENTOS
-INSERT INTO shopmaquinas.Document(PersonID, DocumentType, DocumentNumber) VALUES (2, 'CPF', '00972625100');
-
--- USUÁRIOS
-INSERT INTO shopmaquinas.User(Username, Password, PersonID) VALUES ('francis', 'francis123', 1);
-INSERT INTO shopmaquinas.User(Username, Password, PersonID) VALUES ('maruero', 'dias1986', 2);
-
--- CONTRATOS
-INSERT INTO shopmaquinas.Contract(ContractDefinitionID, PersonID, StartDate) VALUES (1, 1, '2014-11-02');
-INSERT INTO shopmaquinas.Contract(ContractDefinitionID, PersonID, StartDate) VALUES (2, 2, '2014-11-02');
+INSERT INTO shopmaquinas.ContractDefinitionPropertyValue (ContractDefinitionPropertyID, ContractDefinitionID, Value) VALUES (3, 2, '5');
 
 -- PROPRIEDADES DOS ANÚNCIOS
-INSERT INTO shopmaquinas.AdProperty(Name, Description) VALUES ('BRAND', 'Marca do produto anunciado');
-INSERT INTO shopmaquinas.AdProperty(Name, Description) VALUES ('HIGHLIGHTED', 'Anúncio aparecerá como destaque');
-INSERT INTO shopmaquinas.AdProperty(Name, Description) VALUES ('IMAGE', 'Imagem do anúncio');
-INSERT INTO shopmaquinas.AdProperty(Name, Description) VALUES ('MODEL', 'Modelo do produto anunciado');
-INSERT INTO shopmaquinas.AdProperty(Name, Description) VALUES ('PRICE', 'Preço do produto anunciado');
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('TYPE', 'Tipo', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('GROUP', 'Grupo', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('CATEGORY', 'Categoria', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('BRAND', 'Marca', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('MODEL', 'Modelo', true);
 
--- ANÚNCIOS
-INSERT INTO shopmaquinas.Ad(ContractID, PersonID, StartDate) VALUES (1, 1, '2014-11-02');
-INSERT INTO shopmaquinas.Ad(ContractID, PersonID, StartDate) VALUES (2, 2, '2014-11-02');
-
--- VALOR DAS PROPRIEDADES DOS ANÚNCIOS
-INSERT INTO shopmaquinas.AdPropertyValue(AdID, AdPropertyID, Value) VALUES (1, 1, 'Trator Ferreira');
-INSERT INTO shopmaquinas.AdPropertyValue(AdID, AdPropertyID, Value) VALUES (1, 4, '100000');
-INSERT INTO shopmaquinas.AdPropertyValue(AdID, AdPropertyID, Value) VALUES (2, 1, 'Trator Dias');
-INSERT INTO shopmaquinas.AdPropertyValue(AdID, AdPropertyID, Value) VALUES (2, 2, '101000');
-INSERT INTO shopmaquinas.AdPropertyValue(AdID, AdPropertyID, Value) VALUES (2, 4, '101000');
-
--- MENSAGEM
-INSERT INTO shopmaquinas.Message(Date, FromPersonID, ToPersonID, AdID, Text) VALUES( '2014-11-02', 1, 2, 1, 'Teste de mensagem');
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('HIGHLIGHTED', 'Anúncio aparecerá como destaque', false);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('IMAGE', 'Imagem do anúncio', false);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('LONG_DESCRIPTION', 'Descrição', false);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('PRICE', 'Preço', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('PUBLISHED', 'Anúncio aprovado', false);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('YEAR', 'Ano de fabricação', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('COLOR', 'Cor', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('UNIQUE_OWNER', 'Único dono', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('EXCHANGE', 'Aceita troca', true);
+INSERT INTO shopmaquinas.AdProperty(Name, Description, Visible) VALUES ('HOURS', 'Horas', true);
 
 

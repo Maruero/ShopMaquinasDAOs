@@ -12,6 +12,11 @@
 		<class>br.diastecnologia.shopmaquinas.bean.Document</class>
 		<class>br.diastecnologia.shopmaquinas.bean.Person</class>
 		<class>br.diastecnologia.shopmaquinas.bean.User</class>
+		<class>br.diastecnologia.shopmaquinas.bean.Category</class>
+		<class>br.diastecnologia.shopmaquinas.bean.Type</class>
+		<class>br.diastecnologia.shopmaquinas.bean.Subtype</class>
+		<class>br.diastecnologia.shopmaquinas.bean.Brand</class>
+		<class>br.diastecnologia.shopmaquinas.bean.Model</class>
 		
 		<properties>
 			<!-- 
@@ -28,6 +33,8 @@
 			<property name="eclipselink.target-database" value="MySQL"/>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
 			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/shopmaquinas"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>

@@ -18,11 +18,11 @@ public class Document implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@Column(updatable=false)
+	@Column
 	private int personID;
 	
 	@Id
-	@Column(updatable=false)
+	@Column
 	private String documentType;
 	private String documentNumber;
 	

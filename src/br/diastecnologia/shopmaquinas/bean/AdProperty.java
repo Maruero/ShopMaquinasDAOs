@@ -24,6 +24,7 @@ public class AdProperty implements Serializable{
 	
 	private String name;
 	private String description;
+	private boolean visible;
 	
 	public int getAdPropertyID() {
 		return adPropertyID;
@@ -42,6 +43,12 @@ public class AdProperty implements Serializable{
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public boolean isVisible() {
+		return visible;
+	}
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 }

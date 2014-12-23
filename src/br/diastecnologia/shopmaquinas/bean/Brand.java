@@ -11,46 +11,57 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="Company")
-@NamedQuery(name="Company.findAll", query="SELECT c FROM Company c")
-public class Company implements Serializable {
+@Table(name="Brand")
+@NamedQuery(name="Brand.findAll", query="SELECT b FROM Brand b")
+public class Brand implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-
+	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(updatable=false)
-	private int companyID;
+	private int id;
 	
 	private String name;
-	private String comercialName;
-	private String cnpj;
-	
-	public int getCompanyID() {
-		return companyID;
-	}
-	public void setCompanyID(int companyID) {
-		this.companyID = companyID;
-	}
+
+	private int parentId;
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getComercialName() {
-		return comercialName;
-	}
-	public void setComercialName(String comercialName) {
-		this.comercialName = comercialName;
-	}
-	public String getCnpj() {
-		return cnpj;
-	}
-	public void setCnpj(String cnpj) {
-		this.cnpj = cnpj;
+	
+	@Override
+	public boolean equals(Object obj){
+		if( obj == null || !(obj instanceof Brand)){
+			return false;
+		}
+		Brand other = (Brand)obj;
+		return id == (other.id);
 	}
 	
-	
+	@Override
+	public int hashCode(){
+		return id;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(int parentId) {
+		this.parentId = parentId;
+	}
 	
 }

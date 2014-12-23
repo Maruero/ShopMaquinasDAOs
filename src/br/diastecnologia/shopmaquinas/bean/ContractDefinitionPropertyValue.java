@@ -5,9 +5,9 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
@@ -27,7 +27,7 @@ public class ContractDefinitionPropertyValue implements Serializable{
 	private String value;
 	
 	@ManyToOne
-	@PrimaryKeyJoinColumn(name="ContractDefinitionPropertyID", referencedColumnName="ContractDefinitionPropertyID")
+	@JoinColumn(name="ContractDefinitionPropertyID", referencedColumnName="ContractDefinitionPropertyID")
 	private ContractDefinitionProperty contractDefinitionProperty;
 	
 	public ContractDefinitionProperty getContractDefinitionProperty() {

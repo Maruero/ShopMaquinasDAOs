@@ -3,9 +3,12 @@ package br.diastecnologia.shopmaquinas.bean;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,24 +34,21 @@ public class Ad implements Serializable {
 	@Column(updatable=false)
 	private int adID;
 	
-	private int contractID;
-	private int personID;
-	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="PersonID",  referencedColumnName="PersonID")
 	private Person person;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="ContractID",  referencedColumnName="ContractID")
 	private Contract contract;
 	
-	@OneToMany
+	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumn(name="AdID")
 	private List<AdPropertyValue> adPropertyValues;
 	
@@ -58,22 +58,6 @@ public class Ad implements Serializable {
 
 	public void setAdID(int adID) {
 		this.adID = adID;
-	}
-
-	public int getContractID() {
-		return contractID;
-	}
-
-	public void setContractID(int contractID) {
-		this.contractID = contractID;
-	}
-
-	public int getPersonID() {
-		return personID;
-	}
-
-	public void setPersonID(int personID) {
-		this.personID = personID;
 	}
 
 	public Date getStartDate() {
@@ -125,6 +109,44 @@ public class Ad implements Serializable {
 		}
 		
 		return desc;
+	}
+	
+	public String getYear(){
+		String year = "";
+		if( adPropertyValues != null ){
+			year += adPropertyValues.stream().filter( p-> p.getAdProperty().getName().equals( AdProperties.YEAR.toString() ) ).findFirst().get().getValue();
+		}
+		return year;
+	}
+	
+	public String getImage(){
+		String image = "";
+		if( adPropertyValues != null ){
+			image += adPropertyValues.stream().filter( p-> 
+				p.getAdProperty().getName().equals( AdProperties.IMAGE.toString() )
+				&& p.getValue().contains("mini")
+					).findFirst().get().getValue();
+		}
+		return image;
+	}
+	
+	public String getLongDescription(){
+		String desc = "";
+		if( adPropertyValues != null ){
+			Optional<AdPropertyValue> prop = adPropertyValues.stream().filter( p-> p.getAdProperty().getName().equals( AdProperties.LONG_DESCRIPTION.toString() ) ).findFirst();
+			if( prop.isPresent() ){
+				desc = prop.get().getValue();
+			}
+		}
+		return desc;
+	}
+	
+	public List<String> getImages(){
+		List<String> images = null;
+		if( adPropertyValues != null ){
+			images = adPropertyValues.stream().filter( p-> p.getAdProperty().getName().equals( AdProperties.IMAGE.toString() ) ).map( p-> p.getValue() ).collect(Collectors.toList() );
+		}
+		return images;
 	}
 	
 

@@ -6,16 +6,18 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import br.diastecnologia.shopmaquinas.enums.Gender;
+import br.diastecnologia.shopmaquinas.enums.PersonType;
 
 @Entity
 @Table(name="Person")
@@ -24,14 +26,16 @@ public class Person implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private int personID;
+	private PersonType personType = PersonType.HUMAN;
 	private String lastname;
-	private String firstName;
+	private String firstname;
 	private List<Document> documents;
-	private Company company;
-	private Gender gender;
+	private Gender gender = Gender.MALE;
 	private List<Contract> contracts;
 	private String email;
 	private String phone;
+	private Address address;
+	private List<Image> images;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -48,13 +52,13 @@ public class Person implements Serializable {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
-	public String getFirstName() {
-		return firstName;
+	public String getFirstname() {
+		return firstname;
 	}
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
-	@OneToMany
+	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumn(name="PersonID")
 	public List<Document> getDocuments() {
 		return documents;
@@ -62,22 +66,13 @@ public class Person implements Serializable {
 	public void setDocuments(List<Document> documents) {
 		this.documents = documents;
 	}
-	@ManyToOne(cascade=CascadeType.ALL)
-	@JoinColumn(name="CompanyID")
-	public Company getCompany() {
-		return company;
-	}
-	public void setCompany(Company company) {
-		this.company = company;
-	}
 	public Gender getGender() {
 		return gender;
 	}
 	public void setGender(Gender gender) {
 		this.gender = gender;
 	}
-	@OneToMany
-	@JoinColumn(name="ContractID")
+	@OneToMany(mappedBy="person", cascade=CascadeType.ALL)
 	public List<Contract> getContracts() {
 		return contracts;
 	}
@@ -95,6 +90,29 @@ public class Person implements Serializable {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	
+	@OneToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@JoinColumn(name="AddressID", columnDefinition="AddressID")
+	public Address getAddress() {
+		return address;
+	}
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+	public PersonType getPersonType() {
+		return personType;
+	}
+	public void setPersonType(PersonType personType) {
+		this.personType = personType;
+	}
+	
+	@OneToMany(mappedBy="person", cascade=CascadeType.ALL)
+	public List<Image> getImages() {
+		return images;
+	}
+	public void setImages(List<Image> images) {
+		this.images = images;
 	}
 	
 }

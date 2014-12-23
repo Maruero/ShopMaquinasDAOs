@@ -1,11 +1,14 @@
 package br.diastecnologia.shopmaquinas.bean;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,10 +16,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import br.diastecnologia.shopmaquinas.enums.BillingStatus;
+import br.diastecnologia.shopmaquinas.enums.ContractStatus;
 
 @Entity
 @Table(name="Contract")
@@ -29,28 +36,28 @@ public class Contract implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(updatable=false)
 	private int contractID;
-	
-	private int contractDefinitionID;
-	
-	private Integer personID;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date StartDate;
+	private Date startDate;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date EndDate;
+	private Date endDate;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER,cascade=CascadeType.ALL)
 	@JoinColumn(name="ContractDefinitionID", referencedColumnName="ContractDefinitionID")
 	private ContractDefinition contractDefinition;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	@JoinColumn(name="PersonID",  referencedColumnName="PersonID")
 	private Person person;
 	
-	@OneToMany
-	@JoinColumn(name="ContractID")
+	@OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@JoinColumn(name="ContractID", referencedColumnName="PersonID")
 	private List<Ad> ads;
+	
+	@OneToMany(mappedBy="contract", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@OrderBy("dueDate desc")
+	private List<Billing> billings;
 	
 	public int getContractID() {
 		return contractID;
@@ -60,36 +67,20 @@ public class Contract implements Serializable {
 		this.contractID = contractID;
 	}
 
-	public int getContractDefinitionID() {
-		return contractDefinitionID;
-	}
-
-	public void setContractDefinitionID(int contractDefinitionID) {
-		this.contractDefinitionID = contractDefinitionID;
-	}
-
-	public Integer getPersonID() {
-		return personID;
-	}
-
-	public void setPersonID(Integer personID) {
-		this.personID = personID;
-	}
-
 	public Date getStartDate() {
-		return StartDate;
+		return startDate;
 	}
 
 	public void setStartDate(Date startDate) {
-		StartDate = startDate;
+		this.startDate = startDate;
 	}
 
 	public Date getEndDate() {
-		return EndDate;
+		return endDate;
 	}
 
 	public void setEndDate(Date endDate) {
-		EndDate = endDate;
+		this.endDate = endDate;
 	}
 
 	public ContractDefinition getContractDefinition() {
@@ -114,6 +105,32 @@ public class Contract implements Serializable {
 
 	public void setPerson(Person person) {
 		this.person = person;
+	}
+
+	public List<Billing> getBillings() {
+		return billings;
+	}
+
+	public void setBillings(List<Billing> billings) {
+		this.billings = billings;
+	}
+
+	@Transient
+	public ContractStatus getContractStatus() {
+		
+		if( billings == null || billings.size() < 1 ){
+			return ContractStatus.CANCELED;
+		}
+		
+		if( billings != null && billings.size() > 0 && billings.get( 0 ).getStatus() != BillingStatus.PAID ){
+			return ContractStatus.NOT_PAID; 
+		}
+		
+		if( endDate != null && endDate.before(Calendar.getInstance().getTime())){
+			return ContractStatus.EXPIRED;
+		}
+		
+		return ContractStatus.ACTIVE;
 	}
 	
 }
