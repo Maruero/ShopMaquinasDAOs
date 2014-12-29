@@ -179,6 +179,7 @@ CREATE TABLE shopmaquinas.AdPropertyValue(
 	    ON UPDATE NO ACTION
 );
 
+DROP TABLE IF EXISTS shopmaquinas.Message;
 CREATE TABLE shopmaquinas.Message(
 	MessageID INT NOT NULL AUTO_INCREMENT,
 	FromPersonID INT NOT NULL,
@@ -186,6 +187,7 @@ CREATE TABLE shopmaquinas.Message(
 	AdID INT,
 	Date datetime NOT NULL,
 	Text VARCHAR(2000),
+	Status INT NOT NULL,
 	PRIMARY KEY(MessageID),
 	CONSTRAINT MessageFKPersonFrom
 		FOREIGN KEY (FromPersonID)

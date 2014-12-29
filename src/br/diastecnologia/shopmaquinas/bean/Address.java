@@ -29,6 +29,22 @@ public class Address implements Serializable {
 	private String complement;
 	private String city;
 	
+	public Address(){
+		
+	}
+	
+	public Address(Boolean empty){
+		if(empty){
+			cep = "";
+			uf = "";
+			street = "";
+			number = "";
+			neighborhood = "";
+			complement = "";
+			city = "";
+		}
+	}
+	
 	public int getAddressID() {
 		return addressID;
 	}

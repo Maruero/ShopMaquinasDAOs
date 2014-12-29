@@ -14,7 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import br.diastecnologia.shopmaquinas.enums.Gender;
 import br.diastecnologia.shopmaquinas.enums.PersonType;
@@ -36,6 +38,21 @@ public class Person implements Serializable {
 	private String phone;
 	private Address address;
 	private List<Image> images;
+	private List<Message> messages;
+	
+	public Person(){
+		
+	}
+	
+	public Person( Boolean empty ){
+		if( empty ){
+			lastname = "";
+			firstname = "";
+			email = "";
+			phone = "";
+			address = new Address(empty);
+		}
+	}
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -66,6 +83,16 @@ public class Person implements Serializable {
 	public void setDocuments(List<Document> documents) {
 		this.documents = documents;
 	}
+	
+	@Transient
+	public Document getFirstDocument(){
+		if( documents != null && documents.size() > 0 ){
+			return documents.get( 0 );
+		}else{
+			return null;
+		}
+	}
+	
 	public Gender getGender() {
 		return gender;
 	}
@@ -114,5 +141,16 @@ public class Person implements Serializable {
 	public void setImages(List<Image> images) {
 		this.images = images;
 	}
+	
+	@OneToMany(mappedBy="toPerson", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@OrderBy("date desc")
+	public List<Message> getMessages() {
+		return messages;
+	}
+	public void setMessages(List<Message> messages) {
+		this.messages = messages;
+	}
+	
+	
 	
 }

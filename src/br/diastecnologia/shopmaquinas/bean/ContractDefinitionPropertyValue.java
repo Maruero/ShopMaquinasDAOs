@@ -93,4 +93,20 @@ class ContractDefinitionPropertyValueID implements Serializable{
 	public void setContractDefinitionID(int contractDefinitionID) {
 		this.contractDefinitionID = contractDefinitionID;
 	}
+	
+	@Override
+	public boolean equals(Object obj){
+		if( obj == null || !(obj instanceof ContractDefinitionPropertyValueID)){
+			return false;
+		}
+		
+		ContractDefinitionPropertyValueID other = (ContractDefinitionPropertyValueID)obj;
+		
+		return this.contractDefinitionID == other.contractDefinitionID && this.contractDefinitionPropertyID == other.contractDefinitionPropertyID;
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.contractDefinitionID * this.contractDefinitionPropertyID;
+	}
 }

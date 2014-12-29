@@ -67,4 +67,20 @@ class DocumentID implements Serializable {
 	public void setDocumentType(String documentType) {
 		this.documentType = documentType;
 	}
+	
+	@Override
+	public boolean equals(Object obj){
+		if( obj == null || !(obj instanceof DocumentID)){
+			return false;
+		}
+		
+		DocumentID other = (DocumentID)obj;
+		
+		return this.documentType.equals( other.documentType ) && this.personID == other.personID;
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.documentType.hashCode() * this.personID;
+	}
 }

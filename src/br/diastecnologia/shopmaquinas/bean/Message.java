@@ -13,6 +13,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import br.diastecnologia.shopmaquinas.enums.MessageStatus;
 
 @Entity
 @Table(name="Message")
@@ -38,6 +41,8 @@ public class Message {
 	@ManyToOne
 	@JoinColumn(name="AdID",  referencedColumnName="AdID")
 	private Ad ad;
+	
+	private MessageStatus status;
 	
 	private String text;
 
@@ -87,6 +92,24 @@ public class Message {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+
+	public MessageStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(MessageStatus status) {
+		this.status = status;
+	}
+	
+	@Transient
+	public String getDescription(){
+		String description = text;
+		if( description != null && description.length() > 30 ){
+			description = description.substring(0, 30) + "...";
+		}
+		return description;
+		
 	}
 	
 	
