@@ -1,6 +1,8 @@
 package br.diastecnologia.shopmaquinas.bean;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -18,6 +20,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import br.diastecnologia.shopmaquinas.enums.ContractStatus;
 import br.diastecnologia.shopmaquinas.enums.Gender;
 import br.diastecnologia.shopmaquinas.enums.PersonType;
 
@@ -140,6 +143,36 @@ public class Person implements Serializable {
 	}
 	public void setImages(List<Image> images) {
 		this.images = images;
+	}
+	
+	@Transient
+	public String getFirstImage(){
+		if( images != null && images.size() > 0 ){
+			return images.get( 0 ).getPath();
+		}
+		return null;
+	}
+	
+	@Transient
+	public List<Ad> getAds( int adId ){
+		List<Ad> ads = new ArrayList<Ad>();
+		
+		if( contracts != null ){
+			for( Contract contract : contracts ){
+				if( contract.getContractStatus() == ContractStatus.ACTIVE && contract.getAds() != null ){
+					for( Ad ad : contract.getAds() ){
+						if( ad.getAdID() != adId && (ad.getEndDate() == null || ad.getEndDate().after( Calendar.getInstance().getTime() ) ) ){
+							ads.add(ad);
+							if( ads.size() == 6 ){
+								return ads;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return ads;
 	}
 	
 	@OneToMany(mappedBy="toPerson", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
