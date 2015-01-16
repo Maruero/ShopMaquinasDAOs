@@ -1,6 +1,42 @@
 drop database shopmaquinas;
 create database shopmaquinas;
 
+CREATE TABLE shopmaquinas.Job(
+	JobID INT NOT NULL AUTO_INCREMENT,
+	JobName VARCHAR(50) NOT NULL,
+	BeginHour INT NOT NULL,
+	EndHour INT NOT NULL,
+	ExecutionCount INT NOT NULL,
+	Query VARCHAR(2000) NOT NULL,
+	PRIMARY KEY(JobID)
+);
+
+CREATE TABLE shopmaquinas.JobItem(
+	ItemID INT NOT NULL AUTO_INCREMENT,
+	JobID INT NOT NULL,
+	ItemLoaded DATETIME NOT NULL,
+	ItemExecuted DATETIME,
+	PRIMARY KEY(ItemID),
+	CONSTRAINT JobItemFKJob
+    FOREIGN KEY (JobID)
+    REFERENCES shopmaquinas.Job (JobID)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+CREATE TABLE shopmaquinas.JobExecution(
+	ExecutionID INT NOT NULL AUTO_INCREMENT,
+	JobID INT NOT NULL,
+	ExecutionLoaded DATETIME NOT NULL,
+	ExecutionExecuted DATETIME,
+	PRIMARY KEY(ExecutionID),
+	CONSTRAINT JobExecutionFKJob
+    FOREIGN KEY (JobID)
+    REFERENCES shopmaquinas.Job (JobID)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
 CREATE TABLE shopmaquinas.Address(
 	AddressID INT NOT NULL AUTO_INCREMENT,
 	Cep VARCHAR(8) NOT NULL,
@@ -64,6 +100,18 @@ CREATE TABLE shopmaquinas.User(
 	CONSTRAINT UserFKPerson
 	    FOREIGN KEY (PersonID)
 	    REFERENCES shopmaquinas.Person (PersonID)
+	    ON DELETE NO ACTION
+	    ON UPDATE NO ACTION
+);
+
+CREATE TABLE shopmaquinas.UserToken(
+	Token VARCHAR(200) NOT NULL,	
+	UserID INT NOT NULL,
+	ExpirationDate DATETIME NOT NULL,
+	PRIMARY KEY (Token),
+	CONSTRAINT UserFKUser
+	    FOREIGN KEY (UserID)
+	    REFERENCES shopmaquinas.User (UserID)
 	    ON DELETE NO ACTION
 	    ON UPDATE NO ACTION
 );

@@ -23,6 +23,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import br.diastecnologia.shopmaquinas.enums.BillingStatus;
+import br.diastecnologia.shopmaquinas.enums.ContractDefinitionProperty;
 import br.diastecnologia.shopmaquinas.enums.ContractStatus;
 
 @Entity
@@ -47,15 +48,15 @@ public class Contract implements Serializable {
 	@JoinColumn(name="ContractDefinitionID", referencedColumnName="ContractDefinitionID")
 	private ContractDefinition contractDefinition;
 	
-	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	@JoinColumn(name="PersonID",  referencedColumnName="PersonID")
 	private Person person;
 	
 	@OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-	@JoinColumn(name="ContractID", referencedColumnName="PersonID")
+	@JoinColumn(name="ContractID", referencedColumnName="ContractID")
 	private List<Ad> ads;
 	
-	@OneToMany(mappedBy="contract", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	@OrderBy("dueDate desc")
 	private List<Billing> billings;
 	
@@ -123,14 +124,45 @@ public class Contract implements Serializable {
 		}
 		
 		if( billings != null && billings.size() > 0 && billings.get( 0 ).getStatus() != BillingStatus.PAID ){
-			return ContractStatus.NOT_PAID; 
+			if( endDate == null || endDate.before(Calendar.getInstance().getTime())){
+				return ContractStatus.NOT_PAID; 
+			}
 		}
 		
 		if( endDate != null && endDate.before(Calendar.getInstance().getTime())){
 			return ContractStatus.EXPIRED;
 		}
 		
+		double maxAd = this.getContractDefinition()
+				.getContractDefinitionPropertyValues()
+				.stream().filter( p -> 
+					p.getContractDefinitionProperty().getName().equals( ContractDefinitionProperty.AD_QUANTITY.toString() ) 
+				).findFirst().get().getDoubleValue();
+		
+		int contractAdsCount = 0;
+		if( this.getAds() != null){
+			contractAdsCount = this.getAds().size();
+		}
+		
+		if( maxAd <= contractAdsCount ){
+			return ContractStatus.NO_MORE_ADS;
+		}
+		
 		return ContractStatus.ACTIVE;
+	}
+	
+	@Override
+	public boolean equals(Object obj){
+		if( obj == null || !(obj instanceof Contract)){
+			return false;
+		}
+		Contract contract = (Contract)obj;
+		return contract.contractID == this.contractID;
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.contractID;
 	}
 	
 }

@@ -39,6 +39,8 @@ public class ContractDefinition implements Serializable{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date startDate;
 	
+	private int order;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 	public int getContractDefinitionID() {
@@ -77,6 +79,12 @@ public class ContractDefinition implements Serializable{
 	public void setContractDefinitionPropertyValues(
 			List<ContractDefinitionPropertyValue> contractDefinitionPropertyValues) {
 		this.contractDefinitionPropertyValues = contractDefinitionPropertyValues;
+	}
+	public int getOrder() {
+		return order;
+	}
+	public void setOrder(int order) {
+		this.order = order;
 	}
 	
 	

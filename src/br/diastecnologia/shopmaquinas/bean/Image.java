@@ -49,5 +49,19 @@ public class Image implements Serializable{
 		this.person = person;
 	}
 	
+	@Override
+	public boolean equals(Object obj){
+		if( obj == null || !(obj instanceof Image)){
+			return false;
+		}
+		
+		Image image = (Image)obj;
+		return imageID == image.imageID;
+	}
+	
+	@Override
+	public int hashCode(){
+		return imageID;
+	}
 	
 }

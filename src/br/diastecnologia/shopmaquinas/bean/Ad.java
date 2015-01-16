@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -41,11 +40,11 @@ public class Ad implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endDate;
 
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="PersonID",  referencedColumnName="PersonID")
 	private Person person;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="ContractID",  referencedColumnName="ContractID")
 	private Contract contract;
 	
@@ -121,14 +120,18 @@ public class Ad implements Serializable {
 	}
 	
 	public String getImage(){
-		String image = "";
 		if( adPropertyValues != null ){
-			image += adPropertyValues.stream().filter( p-> 
+			Optional<AdPropertyValue> prop = adPropertyValues.stream().filter( p-> 
 				p.getAdProperty().getName().equals( AdProperties.IMAGE.toString() )
 				&& p.getValue().contains("mini")
-					).findFirst().get().getValue();
+					).findFirst();
+			if( prop.isPresent() ){
+				return prop.get().getValue();
+			}else{
+				return null;
+			}
 		}
-		return image;
+		return null;
 	}
 	
 	public String getLongDescription(){
@@ -151,4 +154,18 @@ public class Ad implements Serializable {
 	}
 	
 
+	@Override
+	public boolean equals(Object obj){
+		if( obj == null || !(obj instanceof Ad)){
+			return false;
+		}
+		Ad ad = (Ad)obj;
+		return this.adID == ad.adID;
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.adID;
+	}
+	
 }

@@ -122,7 +122,7 @@ public class Person implements Serializable {
 		this.phone = phone;
 	}
 	
-	@OneToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	@JoinColumn(name="AddressID", columnDefinition="AddressID")
 	public Address getAddress() {
 		return address;
@@ -137,7 +137,7 @@ public class Person implements Serializable {
 		this.personType = personType;
 	}
 	
-	@OneToMany(mappedBy="person", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="person", orphanRemoval = true, cascade= CascadeType.ALL)
 	public List<Image> getImages() {
 		return images;
 	}
@@ -148,7 +148,11 @@ public class Person implements Serializable {
 	@Transient
 	public String getFirstImage(){
 		if( images != null && images.size() > 0 ){
-			return images.get( 0 ).getPath();
+			for( Image image : images ){
+				if( image.getPath().indexOf("mini") == -1){
+					return image.getPath();
+				}
+			}
 		}
 		return null;
 	}
@@ -159,7 +163,7 @@ public class Person implements Serializable {
 		
 		if( contracts != null ){
 			for( Contract contract : contracts ){
-				if( contract.getContractStatus() == ContractStatus.ACTIVE && contract.getAds() != null ){
+				if( (contract.getContractStatus() == ContractStatus.ACTIVE || contract.getContractStatus() == ContractStatus.NO_MORE_ADS) && contract.getAds() != null ){
 					for( Ad ad : contract.getAds() ){
 						if( ad.getAdID() != adId && (ad.getEndDate() == null || ad.getEndDate().after( Calendar.getInstance().getTime() ) ) ){
 							ads.add(ad);

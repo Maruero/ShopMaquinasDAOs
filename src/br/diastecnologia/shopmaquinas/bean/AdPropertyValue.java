@@ -97,6 +97,21 @@ public class AdPropertyValue implements Serializable{
 		this.adProperty = adProperty;
 		this.adPropertyID = adProperty.getAdPropertyID();
 	}
+	
+	@Override
+	public int hashCode (){
+		return adID * adPropertyID * (value != null ? value.hashCode() : 1);
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if( other != null && other instanceof AdPropertyValue ){
+			AdPropertyValue another = (AdPropertyValue)other;
+			return adID == another.adID && adPropertyID == another.adPropertyID && value != null ? value.equals(another.value) : true;
+		}else{
+			return false;
+		}
+	}
 }
 
 class AdPropertyValueID implements Serializable{
